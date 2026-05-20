@@ -96,7 +96,7 @@ const stepActions: UIAction[][] = [
       participantCount: 1,
       preview: '카카오 알림톡 초대를 발송했습니다.',
       toast: {
-        message: `카카오 알림톡(비즈뿌리오) 발송 완료 — ${SK_CHANNEL_NAME}`,
+        message: `카카오 알림톡 발송 완료 — ${SK_CHANNEL_NAME}`,
         tone: 'success',
       },
       description:
@@ -130,7 +130,7 @@ const stepActions: UIAction[][] = [
       body: `${SK_RENTAL_CUST_PARK_NAME} 고객님. 요청하신 K3 1년 단기렌탈 상담을 위해 ${SK_CHANNEL_NAME} 으로 초대드렸습니다. 초대를 수락하시면 상담이 시작됩니다.`,
       ctaLabel: '초대 수락',
       description:
-        '동시에 박찬호 고객의 개인 카카오톡에 비즈뿌리오 알림톡 카드가 도착합니다.',
+        '동시에 박찬호 고객의 개인 카카오톡에 카카오 알림톡 카드가 도착합니다.',
     },
   ],
   // 2. 박찬호 "초대 수락" → 카카오 상담톡 공식 채널 입장
@@ -432,48 +432,83 @@ const stepActions: UIAction[][] = [
   ],
 ];
 
+// ─── 11단계 재구성 ─────────────────────────────────────────────────
+// 기존 7개 stepActions(legacy) 사이에 4개의 신규 narrator step(빈 액션)을
+// 끼워넣어 SK렌터카 현장 맥락(연락처 동기화·LMS 대체·법인폰 진입·보안 감사)을
+// 더 디테일하게 풀어낸다.
+const EMPTY_ACTIONS: UIAction[] = [];
+const orderedStepActions: UIAction[][] = [
+  EMPTY_ACTIONS,     /* 01 연락처 동기화 → 고객 자동 등록 + 담당자 매핑 (NEW) */
+  stepActions[0],    /* 02 카카오 알림톡으로 고객 초대 */
+  EMPTY_ACTIONS,     /* 03 알림톡 수신 실패 → LMS 대체 발송 (NEW) */
+  stepActions[1],    /* 04 박찬호 "초대 수락" → 상담톡 채널 입장 */
+  EMPTY_ACTIONS,     /* 05 외근 중 법인폰 SalesBridge 앱 진입 (NEW) */
+  stepActions[2],    /* 06 견적 문의 + 정대리 법인폰 앱 푸시 */
+  stepActions[3],    /* 07 응대 + K3 사진 3장 + 법인 정보 비즈폼 */
+  stepActions[4],    /* 08 견적서 PDF 회신 + 할 일 chip 완료 */
+  EMPTY_ACTIONS,     /* 09 보안 — 고객정보 다운로드 제한 + 감사 이력 (NEW) */
+  stepActions[5],    /* 10 김주임 이직 → 고객 12명 일괄 이관 */
+  stepActions[6],    /* 11 1일 마감 + DB Mart 적재 요약 */
+];
+
 const stepTitles = [
+  '연락처 동기화 → 박찬호 신규 고객 자동 등록 + 담당자 매핑',
   '카카오 알림톡으로 고객 초대',
+  '알림톡 수신 실패 감지 → LMS 대체 발송',
   '박찬호 "초대 수락" → 카카오 상담톡 채널 입장',
-  '고객 견적 문의 + 정대리 법인폰 FCM 푸시',
+  '외근 중 법인폰 SalesBridge 앱 진입 (로그인 유지)',
+  '고객 견적 문의 + 정대리 법인폰 앱 푸시',
   '응대 + K3 사진 3장 + 사업자 비즈폼으로 메타 수집',
   '견적서 PDF 회신 + 할 일 chip 등록 → 완료',
+  '보안 — 고객정보 다운로드 제한 + 감사 이력',
   '동료 김주임 이직 → 고객 12명 일괄 이관',
   '1일 마감 + DB Mart 적재 요약',
 ];
 
 const stepDescriptions = [
+  '정대리가 법인폰에서 연락처 동기화를 실행하면 박찬호 대표가 SalesBridge 고객 목록에 자동 등록됩니다. 담당자가 정대리로 자동 매핑되어 이후 모든 응대 이력·DB Mart 적재가 정대리 기준으로 회사 시스템에 연결됩니다 — "이 고객은 누가 응대했나"가 모호한 개인 카톡 시대와 달리 등록 시점부터 담당자가 명확히 남습니다.',
   '정대리가 PC 에서 한솔무역 박찬호 대표를 외부 참여자로 선택하고 카카오 알림톡 발송을 켠 채로 채널을 생성합니다 — 외부채널이 아닌 SK렌터카 공식 채널로만 응대.',
-  '박찬호가 개인 카카오톡에 도착한 비즈뿌리오 알림톡의 "초대 수락" 버튼을 눌러 SK렌터카 카카오 상담톡 공식 채널에 진입합니다.',
-  '박찬호가 K3 단기렌탈 견적을 요청하자 외근 중인 정대리 법인폰 SalesBridge 앱에 FCM 푸시가 즉시 도착합니다.',
+  '일부 고객은 카카오 알림톡 수신을 차단해 두기도 합니다. 시스템이 알림톡 발송 실패를 감지하면 동일 초대 문구와 상담방 invitationURL 을 LMS(장문 SMS) 로 자동 전환 발송합니다. 정대리 화면에는 "LMS 대체 발송 완료" 상태가 표시되어 어떤 경로로 진입했는지까지 추적됩니다.',
+  '박찬호가 개인 카카오톡에 도착한 카카오 알림톡(또는 수신 차단 시 LMS 문자)의 "초대 수락" 버튼을 눌러 SK렌터카 카카오 상담톡 공식 채널에 진입합니다.',
+  '정대리는 외근 중 법인폰에서 SalesBridge 앱을 실행합니다. SK렌터카는 영업사원에게 법인폰 사용을 강제하고 있으며, 별도 재로그인 없이 마지막 상담방으로 자동 진입되어 신규 문의를 즉시 응대할 수 있는 상태가 됩니다.',
+  '박찬호가 K3 단기렌탈 견적을 요청하자 외근 중인 정대리 법인폰 SalesBridge 앱에 푸시 알림이 즉시 도착합니다 — 회사 시스템 안에서 외근 응대 속도가 보장됩니다.',
   '정대리가 K3 차종 사진 3장을 카톡 스타일 그리드로 보내고, "법인 정보 등록" 비즈폼으로 사업자번호·차량용도·사업자등록증을 받아 DB Mart 에 자산화합니다.',
   '정대리가 견적서 PDF 를 회신하고 메시지에서 곧바로 후속 안내 전화 할 일을 등록합니다. 박찬호 수령 확인 후 chip 이 완료로 갱신됩니다.',
+  '회사 보안 정책에 따라 채널 내 첨부 파일·견적서·사업자등록증의 개인 단말 다운로드가 비활성화되어 있습니다. 접근 이력과 담당자 변경 이력이 시스템 감사 로그에 기록되어 개인 단말 유출이 원천 차단되고, 보안팀이 사후 감사할 수 있습니다.',
   '영업1팀 김주임이 동종업계로 이직함에 따라 차상훈 팀장이 김주임의 고객 12명·대화방 12개·파일 78건을 정대리로 일괄 이관합니다 — 인수인계 100%.',
   '대시보드에서 1일 응대 통계와 DB Mart 적재 결과를 확인합니다. 외부 채널 사용 0건 — 모든 대화·파일·고객 메타가 회사 자산으로 보관됩니다.',
 ];
 
 // step 인덱스별 활성 외부 시스템 — workspace+guest 화면 아래 카드에서 펄스로 강조.
 const stepActiveSystems: string[][] = [
-  /* 01 알림톡 고객 초대            */ ['alim'],
-  /* 02 초대 수락 → 채널 입장       */ ['alim'],
-  /* 03 견적 문의 + FCM 푸시        */ ['fcm'],
-  /* 04 사진 + 비즈폼               */ ['bizVerify', 'fleet'],
-  /* 05 견적서 회신 + 할 일         */ ['fleet'],
-  /* 06 12명 일괄 이관              */ [],
-  /* 07 DB Mart 적재 요약           */ ['dbmart'],
+  /* 01 연락처 동기화 (NEW)         */ [],
+  /* 02 알림톡 고객 초대            */ ['alim'],
+  /* 03 LMS 대체 발송 (NEW)         */ ['sms'],
+  /* 04 초대 수락 → 채널 입장       */ ['alim'],
+  /* 05 법인폰 앱 진입 (NEW)        */ [],
+  /* 06 견적 문의 + 앱 푸시         */ ['fcm'],
+  /* 07 사진 + 비즈폼               */ ['bizVerify', 'fleet'],
+  /* 08 견적서 회신 + 할 일         */ ['fleet'],
+  /* 09 보안·감사 (NEW)             */ [],
+  /* 10 12명 일괄 이관              */ [],
+  /* 11 DB Mart 적재 요약           */ ['dbmart'],
 ];
 
 const stepSystemStatuses: Array<Record<string, string>> = [
-  /* 01 */ { alim: '비즈뿌리오 알림톡 발송' },
-  /* 02 */ { alim: '상담톡 채널 입장 완료' },
-  /* 03 */ { fcm: '외근 정대리 법인폰 푸시 도착' },
-  /* 04 */ { bizVerify: '사업자번호 진위확인', fleet: 'K3 차종·재고 조회' },
-  /* 05 */ { fleet: '월 38만원 견적 산출 (1년)' },
-  /* 06 */ {},
-  /* 07 */ { dbmart: '응대 32건 · 메시지 482건 · 파일 78건 적재' },
+  /* 01 */ {},
+  /* 02 */ { alim: '카카오 알림톡 발송' },
+  /* 03 */ { alim: '발송 실패 감지', sms: 'LMS 대체 발송 완료' },
+  /* 04 */ { alim: '상담톡 채널 입장 완료' },
+  /* 05 */ {},
+  /* 06 */ { fcm: '외근 정대리 법인폰 푸시 도착' },
+  /* 07 */ { bizVerify: '사업자번호 진위확인', fleet: 'K3 차종·재고 조회' },
+  /* 08 */ { fleet: '월 38만원 견적 산출 (1년)' },
+  /* 09 */ {},
+  /* 10 */ {},
+  /* 11 */ { dbmart: '응대 32건 · 메시지 482건 · 파일 78건 적재' },
 ];
 
-const steps: Step[] = stepActions.map((actions, i) => ({
+const steps: Step[] = orderedStepActions.map((actions, i) => ({
   id: `sk-step-${(i + 1).toString().padStart(2, '0')}`,
   order: i,
   title: `${i + 1}. ${stepTitles[i]}`,
@@ -698,7 +733,8 @@ const beforeSteps: Step[] = beforeActions.map((actions, i) => ({
 const scenario: Scenario = {
   ...meta,
   systems: [
-    { id: 'alim', label: '카카오 알림톡', labelEn: 'KakaoTalk · AlimTalk (비즈뿌리오)', icon: 'MessageCircle', defaultStatus: '대기', activeStatus: '알림톡 발송·수락', accent: 'amber' },
+    { id: 'alim', label: '카카오 알림톡', labelEn: 'KakaoTalk · AlimTalk', icon: 'MessageCircle', defaultStatus: '대기', activeStatus: '알림톡 발송·수락', accent: 'amber' },
+    { id: 'sms', label: 'LMS · SMS', labelEn: 'LMS Gateway (알림톡 대체)', icon: 'Phone', defaultStatus: '대기', activeStatus: 'LMS 대체 발송', accent: 'slate' },
     { id: 'fcm', label: '앱 푸시', labelEn: 'App Push (FCM Gateway)', icon: 'Bell', defaultStatus: '대기', activeStatus: '법인폰 푸시', accent: 'rose' },
     { id: 'bizVerify', label: '사업자 진위확인', labelEn: 'Biz Verify', icon: 'ShieldCheck', defaultStatus: '대기', activeStatus: '사업자번호 검증', accent: 'sky' },
     { id: 'fleet', label: '차량 재고 관리', labelEn: 'Fleet Inventory', icon: 'Factory', defaultStatus: '대기', activeStatus: '차종·재고 조회', accent: 'indigo' },
@@ -708,7 +744,7 @@ const scenario: Scenario = {
     '영업사원 200여 명이 개인 카카오톡 대신 법인폰 SalesBridge 의 카카오 상담톡 공식 채널로만 응대 (외부채널 차단)',
     '대화·파일·사업자 메타데이터를 Action Power 파이프라인으로 DB Mart 에 자동 자산화',
     '동종업계 이직이 빈번한 환경에서 거래처 이력을 100% 회사 자산으로 보존 — 관리자 일괄 이관으로 인수인계 강제',
-    '카카오 알림톡(비즈뿌리오) · FCM 푸시 · MDM 배포 등 시스템 연동으로 200명 분산 환경의 응대 속도 유지',
+    '카카오 알림톡 · FCM 푸시 · MDM 배포 등 시스템 연동으로 200명 분산 환경의 응대 속도 유지',
   ],
   metrics: [
     {

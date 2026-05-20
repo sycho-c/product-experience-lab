@@ -705,7 +705,7 @@ export const SK_BIZFORM_ID = 'sk-bizform-corp';
 export const SK_BIZFORM_MSG_ID = 'sk-bizform-msg';
 export const SK_TASK_ID = 'sk-task-follow-up';
 
-// 카카오 알림톡 비즈뿌리오 SK렌터카 공식 채널 아이덴티티
+// 카카오 알림톡 SK렌터카 공식 채널 아이덴티티
 export const SK_CHANNEL_NAME = 'SK렌터카 공식 채널';
 
 // beforeSteps 전용 — 개인 카카오톡 방 ID

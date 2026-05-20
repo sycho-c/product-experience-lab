@@ -62,7 +62,7 @@ const stepActions: UIAction[][] = [
       kind: 'toggle_check',
       itemId: 'create-room.kakao',
       on: true,
-      description: `카카오 알림톡(비즈뿌리오) 으로 ${SK_CHANNEL_NAME} 초대장을 발송하기를 켭니다.`,
+      description: `카카오 알림톡 으로 ${SK_CHANNEL_NAME} 초대장을 발송하기를 켭니다.`,
     },
     {
       kind: 'click_button',
@@ -115,7 +115,7 @@ const stepActions: UIAction[][] = [
       body: `${SK_RENTAL_CUST_PARK_NAME} 고객님. 요청하신 K3 1년 단기렌탈 상담을 위해 ${SK_CHANNEL_NAME} 으로 초대드렸습니다. 초대를 수락하시면 상담이 시작됩니다.`,
       ctaLabel: '초대 수락',
       description:
-        '박찬호 고객의 개인 카카오톡에 비즈뿌리오 알림톡 카드가 도착합니다.',
+        '박찬호 고객의 개인 카카오톡에 카카오 알림톡 카드가 도착합니다.',
     },
   ],
   // 2. 박찬호 "초대 수락" → 카카오 상담톡 공식 채널 입장
@@ -152,7 +152,7 @@ const stepTitles = [
 ];
 
 const stepDescriptions = [
-  '정대리가 외부 고객 검색에서 박찬호를 선택하고 카카오 알림톡 발송을 켠 채로 채널을 생성합니다. 비즈뿌리오 알림톡 카드가 고객 개인 카톡에 도착합니다.',
+  '정대리가 외부 고객 검색에서 박찬호를 선택하고 카카오 알림톡 발송을 켠 채로 채널을 생성합니다. 카카오 알림톡 카드가 고객 개인 카톡에 도착합니다.',
   '박찬호가 알림톡 카드의 "초대 수락" 버튼을 누르면 SK렌터카 공식 카카오 상담톡 채널에 입장하고, 시스템이 비즈니스 채널임을 고지합니다.',
 ];
 
@@ -169,7 +169,7 @@ const steps: Step[] = stepActions.map((actions, i) => ({
 const scenario: Scenario = {
   ...meta,
   goals: [
-    '카카오 알림톡(비즈뿌리오) 으로 외부 고객을 SK렌터카 공식 채널에 초대',
+    '카카오 알림톡 으로 외부 고객을 SK렌터카 공식 채널에 초대',
     '초대 수락 시 비즈니스 채널임을 명확히 고지하여 외부채널 사용 차단',
   ],
   seed: createSkRentalSeed(),

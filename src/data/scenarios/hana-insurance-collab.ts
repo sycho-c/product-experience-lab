@@ -917,7 +917,7 @@ const beforeSteps: Step[] = beforeActions.map((actions, i) => ({
 const scenario: Scenario = {
   ...meta,
   systems: [
-    { id: 'alim', label: '카카오 알림톡', labelEn: 'AlimTalk · 비즈뿌리오', icon: 'MessageCircle', defaultStatus: '대기', activeStatus: '초대 카드 발송', accent: 'amber' },
+    { id: 'alim', label: '카카오 알림톡', labelEn: 'AlimTalk', icon: 'MessageCircle', defaultStatus: '대기', activeStatus: '초대 카드 발송', accent: 'amber' },
     { id: 'gaMaster', label: '영업가족 관리', labelEn: 'GA Master · 위촉/소속', icon: 'Briefcase', defaultStatus: '대기', activeStatus: '영업가족 조회', accent: 'indigo' },
     { id: 'ocr', label: 'OCR 엔진', labelEn: 'OCR — 손글씨 추출', icon: 'ScanLine', defaultStatus: '대기', activeStatus: '5필드 추출', accent: 'sky' },
     { id: 'ner', label: 'NER 엔진', labelEn: 'NER — 의도 추출', icon: 'Sparkles', defaultStatus: '대기', activeStatus: '보험·납입액 추출', accent: 'rose' },
