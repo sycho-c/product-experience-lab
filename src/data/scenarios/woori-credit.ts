@@ -405,6 +405,35 @@ const stepDescriptions = [
   '렌터카팀 호스트가 비즈폼을 승인하고 할 일 chip 을 "완료" 로 변경합니다.',
 ];
 
+// step 인덱스별 활성 외부 시스템 — workspace+guest 화면 아래 카드에서 펄스로 강조.
+const stepActiveSystems: string[][] = [
+  /* 01 외부 고객 문의              */ ['customer'],
+  /* 02 호스트 답변 + 할 일 등록    */ [],
+  /* 03 비밀 메시지 모드 진입       */ [],
+  /* 04 비밀 메시지 전송            */ [],
+  /* 05 Guest 시점 전환             */ [],
+  /* 06 시점 복귀                   */ [],
+  /* 07 비즈폼 메뉴 노출            */ [],
+  /* 08 비즈폼 모달 열림            */ [],
+  /* 09 비즈폼 작성 (사업자등록증)  */ ['bizVerify'],
+  /* 10 비즈폼 제출 → 신용도 검토   */ ['credit', 'limitPolicy'],
+  /* 11 할 일 완료 → 한도 적용      */ ['loan'],
+];
+
+const stepSystemStatuses: Array<Record<string, string>> = [
+  /* 01 */ { customer: '한울모빌리티 거래처 조회' },
+  /* 02 */ {},
+  /* 03 */ {},
+  /* 04 */ {},
+  /* 05 */ {},
+  /* 06 */ {},
+  /* 07 */ {},
+  /* 08 */ {},
+  /* 09 */ { bizVerify: '사업자등록증 진위 확인' },
+  /* 10 */ { credit: 'A등급 통과', limitPolicy: '1억원 한도 승인 가능' },
+  /* 11 */ { loan: '여신 한도 1억원 적용 완료' },
+];
+
 const steps: Step[] = stepActions.map((actions, i) => ({
   id: `wc-step-${(i + 1).toString().padStart(2, '0')}`,
   order: i,
@@ -413,10 +442,19 @@ const steps: Step[] = stepActions.map((actions, i) => ({
   durationMs: 6000,
   talks: [],
   actions,
+  activeSystems: stepActiveSystems[i] ?? [],
+  systemStatuses: stepSystemStatuses[i] ?? {},
 }));
 
 const scenario: Scenario = {
   ...meta,
+  systems: [
+    { id: 'customer', label: '거래처 관리', labelEn: 'Customer Master', icon: 'Briefcase', defaultStatus: '대기', activeStatus: '거래처 조회', accent: 'indigo' },
+    { id: 'bizVerify', label: '사업자 진위확인', labelEn: 'Biz Verify', icon: 'ShieldCheck', defaultStatus: '대기', activeStatus: '사업자등록증 검증', accent: 'sky' },
+    { id: 'credit', label: '신용평가', labelEn: 'Credit Score', icon: 'Gauge', defaultStatus: '대기', activeStatus: '신용 등급 산출', accent: 'rose' },
+    { id: 'limitPolicy', label: '한도 정책', labelEn: 'Limit Policy', icon: 'Workflow', defaultStatus: '대기', activeStatus: '한도 시뮬레이션', accent: 'amber' },
+    { id: 'loan', label: '여신 코어', labelEn: 'Loan Core', icon: 'Database', defaultStatus: '대기', activeStatus: '한도 적용', accent: 'emerald' },
+  ],
   goals: [
     '단체 대화방에서 정형화된 외부 고객 응대',
     '비밀 메시지로 내부 검토 내용 보호',

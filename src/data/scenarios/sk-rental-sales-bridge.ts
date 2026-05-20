@@ -452,6 +452,27 @@ const stepDescriptions = [
   '대시보드에서 1일 응대 통계와 DB Mart 적재 결과를 확인합니다. 외부 채널 사용 0건 — 모든 대화·파일·고객 메타가 회사 자산으로 보관됩니다.',
 ];
 
+// step 인덱스별 활성 외부 시스템 — workspace+guest 화면 아래 카드에서 펄스로 강조.
+const stepActiveSystems: string[][] = [
+  /* 01 알림톡 고객 초대            */ ['alim'],
+  /* 02 초대 수락 → 채널 입장       */ ['alim'],
+  /* 03 견적 문의 + FCM 푸시        */ ['fcm'],
+  /* 04 사진 + 비즈폼               */ ['bizVerify', 'fleet'],
+  /* 05 견적서 회신 + 할 일         */ ['fleet'],
+  /* 06 12명 일괄 이관              */ [],
+  /* 07 DB Mart 적재 요약           */ ['dbmart'],
+];
+
+const stepSystemStatuses: Array<Record<string, string>> = [
+  /* 01 */ { alim: '비즈뿌리오 알림톡 발송' },
+  /* 02 */ { alim: '상담톡 채널 입장 완료' },
+  /* 03 */ { fcm: '외근 정대리 법인폰 푸시 도착' },
+  /* 04 */ { bizVerify: '사업자번호 진위확인', fleet: 'K3 차종·재고 조회' },
+  /* 05 */ { fleet: '월 38만원 견적 산출 (1년)' },
+  /* 06 */ {},
+  /* 07 */ { dbmart: '응대 32건 · 메시지 482건 · 파일 78건 적재' },
+];
+
 const steps: Step[] = stepActions.map((actions, i) => ({
   id: `sk-step-${(i + 1).toString().padStart(2, '0')}`,
   order: i,
@@ -460,6 +481,8 @@ const steps: Step[] = stepActions.map((actions, i) => ({
   durationMs: 6000,
   talks: [],
   actions,
+  activeSystems: stepActiveSystems[i] ?? [],
+  systemStatuses: stepSystemStatuses[i] ?? {},
 }));
 
 // ─────────────────────────────────────────────────────────────────────
@@ -674,6 +697,13 @@ const beforeSteps: Step[] = beforeActions.map((actions, i) => ({
 
 const scenario: Scenario = {
   ...meta,
+  systems: [
+    { id: 'alim', label: '카카오 알림톡', labelEn: 'KakaoTalk · AlimTalk (비즈뿌리오)', icon: 'MessageCircle', defaultStatus: '대기', activeStatus: '알림톡 발송·수락', accent: 'amber' },
+    { id: 'fcm', label: '앱 푸시', labelEn: 'App Push (FCM Gateway)', icon: 'Bell', defaultStatus: '대기', activeStatus: '법인폰 푸시', accent: 'rose' },
+    { id: 'bizVerify', label: '사업자 진위확인', labelEn: 'Biz Verify', icon: 'ShieldCheck', defaultStatus: '대기', activeStatus: '사업자번호 검증', accent: 'sky' },
+    { id: 'fleet', label: '차량 재고 관리', labelEn: 'Fleet Inventory', icon: 'Factory', defaultStatus: '대기', activeStatus: '차종·재고 조회', accent: 'indigo' },
+    { id: 'dbmart', label: 'DB Mart', labelEn: 'Action Power Pipeline', icon: 'Database', defaultStatus: '대기', activeStatus: '메타 자동 적재', accent: 'emerald' },
+  ],
   goals: [
     '영업사원 200여 명이 개인 카카오톡 대신 법인폰 SalesBridge 의 카카오 상담톡 공식 채널로만 응대 (외부채널 차단)',
     '대화·파일·사업자 메타데이터를 Action Power 파이프라인으로 DB Mart 에 자동 자산화',

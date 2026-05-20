@@ -745,6 +745,42 @@ const stepDescriptions = [
   '할 일 chip 과 RightRail 항목이 모두 "완료" 로 변경되고 설계매니저가 처리 결과를 안내합니다.',
 ];
 
+// step 인덱스별 활성 시스템 — workspace+guest 화면 아래 가로 시스템 카드에서
+// 펄스로 강조된다.
+const stepActiveSystems: string[][] = [
+  /* 01 새 대화방 만들기            */ [],
+  /* 02 영업가족 선택                */ ['gaMaster'],
+  /* 03 채널 + 알림톡 발송           */ ['alim'],
+  /* 04 설계사 모바일 입장           */ ['alim'],
+  /* 05 인사 교환                    */ [],
+  /* 06 손글씨 사진 + 설계 요청      */ [],
+  /* 07 단일 메시지 ⋮ (OCR 단독)     */ ['ocr'],
+  /* 08 다중 메시지 선택 → 모달      */ [],
+  /* 09 OCR/NER 자동 추출           */ ['ocr', 'ner'],
+  /* 10 할 일 저장 — chip 부착       */ [],
+  /* 11 고객 등록                    */ ['sfa'],
+  /* 12 가입설계동의서 작성·서명     */ ['esign'],
+  /* 13 장기 가입 설계 → PDF         */ ['policy'],
+  /* 14 할 일 완료                   */ [],
+];
+
+const stepSystemStatuses: Array<Record<string, string>> = [
+  /* 01 */ {},
+  /* 02 */ { gaMaster: '영업가족-김철수(5250223) 조회 완료' },
+  /* 03 */ { alim: '초대 카드 발송' },
+  /* 04 */ { alim: '초대 수락 완료' },
+  /* 05 */ {},
+  /* 06 */ {},
+  /* 07 */ { ocr: '5필드 단독 추출 (데모)' },
+  /* 08 */ {},
+  /* 09 */ { ocr: '5필드 추출 완료', ner: '보험·납입액 추출' },
+  /* 10 */ {},
+  /* 11 */ { sfa: '박정균 고객 등록 완료' },
+  /* 12 */ { esign: '동의서 전자서명·본인인증 완료' },
+  /* 13 */ { policy: '청약 PDF 자동 생성·전달' },
+  /* 14 */ {},
+];
+
 const steps: Step[] = stepActions.map((actions, i) => ({
   id: `hi-step-${(i + 1).toString().padStart(2, '0')}`,
   order: i,
@@ -753,6 +789,8 @@ const steps: Step[] = stepActions.map((actions, i) => ({
   durationMs: 6000,
   talks: [],
   actions,
+  activeSystems: stepActiveSystems[i] ?? [],
+  systemStatuses: stepSystemStatuses[i] ?? {},
 }));
 
 // ─────────────────────────────────────────────────────────
@@ -878,6 +916,15 @@ const beforeSteps: Step[] = beforeActions.map((actions, i) => ({
 
 const scenario: Scenario = {
   ...meta,
+  systems: [
+    { id: 'alim', label: '카카오 알림톡', labelEn: 'AlimTalk · 비즈뿌리오', icon: 'MessageCircle', defaultStatus: '대기', activeStatus: '초대 카드 발송', accent: 'amber' },
+    { id: 'gaMaster', label: '영업가족 관리', labelEn: 'GA Master · 위촉/소속', icon: 'Briefcase', defaultStatus: '대기', activeStatus: '영업가족 조회', accent: 'indigo' },
+    { id: 'ocr', label: 'OCR 엔진', labelEn: 'OCR — 손글씨 추출', icon: 'ScanLine', defaultStatus: '대기', activeStatus: '5필드 추출', accent: 'sky' },
+    { id: 'ner', label: 'NER 엔진', labelEn: 'NER — 의도 추출', icon: 'Sparkles', defaultStatus: '대기', activeStatus: '보험·납입액 추출', accent: 'rose' },
+    { id: 'sfa', label: 'SFA 고객 시스템', labelEn: 'Sales Force Automation', icon: 'Database', defaultStatus: '대기', activeStatus: '고객 자동 등록', accent: 'emerald' },
+    { id: 'esign', label: '본인인증 · 전자서명', labelEn: 'KYC + e-Sign', icon: 'ShieldCheck', defaultStatus: '대기', activeStatus: '서명·인증 진행', accent: 'slate' },
+    { id: 'policy', label: '가입설계 시스템', labelEn: 'Policy Engine', icon: 'FileSignature', defaultStatus: '대기', activeStatus: '청약 PDF 생성', accent: 'amber' },
+  ],
   goals: [
     '개인 카카오톡 → 공식 협업 채널로 전환',
     '메시지/이미지 → OCR/NER 로 고객 정보 자동 추출',

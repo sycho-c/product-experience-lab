@@ -486,6 +486,20 @@ export const StepSchema = z.object({
   talks: z.array(TalkSchema).default([]),
   actions: z.array(UIActionSchema).optional(),
   uiState: z.record(z.string(), z.unknown()).optional(),
+  activeSystems: z.array(z.string()).optional(),
+  systemStatuses: z.record(z.string(), z.string()).optional(),
+});
+
+export const SystemAccentSchema = z.enum(['indigo', 'emerald', 'amber', 'sky', 'rose', 'slate']);
+
+export const SystemNodeSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  labelEn: z.string().optional(),
+  defaultStatus: z.string().optional(),
+  activeStatus: z.string().optional(),
+  accent: SystemAccentSchema.optional(),
+  icon: z.string().optional(),
 });
 
 export const ImpactMetricSchema = z.object({
@@ -523,4 +537,5 @@ export const ScenarioSchema = z.object({
   beforeSteps: z.array(StepSchema).optional(),
   metrics: z.array(ImpactMetricSchema).optional(),
   goals: z.array(z.string()).optional(),
+  systems: z.array(SystemNodeSchema).optional(),
 });
