@@ -4,6 +4,7 @@ import { ExperienceLayout } from '@/layouts/ExperienceLayout';
 import { ScenarioControls } from '@/features/scenario/ScenarioControls';
 import { ScenarioStepList } from '@/features/scenario/ScenarioStepList';
 import { CurrentActionCaption } from '@/features/scenario/CurrentActionCaption';
+import { CustomerSystemPanel } from '@/features/scenario/CustomerSystemPanel';
 import { DeviceFramePC } from '@/features/device/DeviceFramePC';
 import { DeviceFrameMobile } from '@/features/device/DeviceFrameMobile';
 import { BeforeAfterToggle } from '@/features/comparison/BeforeAfterToggle';
@@ -98,15 +99,21 @@ export function ScenarioExperienceRoute() {
       }
       center={
         mode === 'before' ? (
-          <div className="flex flex-1 min-h-0 items-stretch justify-center">
-            <div className="h-full w-full max-w-[440px]">
-              <DeviceFrameMobile mode={mode} emptyState={emptyState} />
+          <div className="flex flex-1 min-h-0 flex-col">
+            <div className="flex flex-1 min-h-0 items-stretch justify-center">
+              <div className="h-full w-full max-w-[440px]">
+                <DeviceFrameMobile mode={mode} emptyState={emptyState} />
+              </div>
             </div>
+            <CustomerSystemPanel />
           </div>
         ) : (
-          <div className="flex flex-1 min-h-0 gap-3 lg:grid lg:grid-cols-[2.8fr_1fr]">
-            <DeviceFramePC mode={mode} emptyState={emptyState} />
-            <DeviceFrameMobile mode={mode} emptyState={emptyState} />
+          <div className="flex flex-1 min-h-0 flex-col">
+            <div className="flex flex-1 min-h-0 gap-3 lg:grid lg:grid-cols-[2.8fr_1fr]">
+              <DeviceFramePC mode={mode} emptyState={emptyState} />
+              <DeviceFrameMobile mode={mode} emptyState={emptyState} />
+            </div>
+            <CustomerSystemPanel />
           </div>
         )
       }

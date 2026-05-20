@@ -411,6 +411,31 @@ const stepDescriptions = [
   '모든 파일이 협업 채널 라이브러리에 자동 보관되어 가온 영업팀 전체가 검색·재활용할 수 있음을 안내합니다.',
 ];
 
+// step 인덱스별 활성 외부 시스템 — workspace+guest 화면 아래 카드에서 펄스로 강조.
+const stepActiveSystems: string[][] = [
+  /* 01 협업 채널 생성              */ [],
+  /* 02 카카오 상담톡 초대 → 입장   */ ['kakaoTalk'],
+  /* 03 사양서 PDF 전송             */ ['sap'],
+  /* 04 BR 답변 + 할 일 등록        */ ['quote'],
+  /* 05 견적서·도면 회신            */ ['quote', 'plm'],
+  /* 06 두 달 후 재발주             */ [],
+  /* 07 자재번호 검색 (대화 조회)   */ [],
+  /* 08 과거 견적 재첨부            */ ['quote'],
+  /* 09 파일 라이브러리 가시성      */ [],
+];
+
+const stepSystemStatuses: Array<Record<string, string>> = [
+  /* 01 */ {},
+  /* 02 */ { kakaoTalk: '거래처 상담톡 초대 발송' },
+  /* 03 */ { sap: '사양 자재코드 확인 — CC-22-150SQ' },
+  /* 04 */ { quote: '견적 산출 시작 — 마감 16:00' },
+  /* 05 */ { quote: '견적서 확정·xlsx 회신', plm: '도면 dwg 자산 등록' },
+  /* 06 */ {},
+  /* 07 */ {},
+  /* 08 */ { quote: '과거 견적서 재활용 (2개월 전)' },
+  /* 09 */ {},
+];
+
 const steps: Step[] = stepActions.map((actions, i) => ({
   id: `gn-step-${(i + 1).toString().padStart(2, '0')}`,
   order: i,
@@ -419,6 +444,8 @@ const steps: Step[] = stepActions.map((actions, i) => ({
   durationMs: 6000,
   talks: [],
   actions,
+  activeSystems: stepActiveSystems[i] ?? [],
+  systemStatuses: stepSystemStatuses[i] ?? {},
 }));
 
 // ─────────────────────────────────────────────────────────
@@ -579,6 +606,12 @@ const beforeSteps: Step[] = beforeActions.map((actions, i) => ({
 
 const scenario: Scenario = {
   ...meta,
+  systems: [
+    { id: 'kakaoTalk', label: '카카오 상담톡', labelEn: 'KakaoTalk Channel', icon: 'MessageCircle', defaultStatus: '대기', activeStatus: '거래처 초대 발송', accent: 'amber' },
+    { id: 'sap', label: 'SAP 자재 마스터', labelEn: 'SAP Material', icon: 'Factory', defaultStatus: '대기', activeStatus: '자재코드 조회', accent: 'indigo' },
+    { id: 'quote', label: '견적엔진', labelEn: 'Quote Engine', icon: 'FileSpreadsheet', defaultStatus: '대기', activeStatus: '견적 산출', accent: 'sky' },
+    { id: 'plm', label: 'PLM · 도면', labelEn: 'PLM · CAD Drawing', icon: 'PenLine', defaultStatus: '대기', activeStatus: '도면 자산 등록', accent: 'rose' },
+  ],
   goals: [
     '개인 카카오톡에 흩어진 거래처 대화·파일을 협업 채널로 내재화',
     '대화마다 빈번한 파일 송수신(사양서·견적서·도면)을 회사 시스템에 자동 보관',

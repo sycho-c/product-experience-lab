@@ -9,6 +9,22 @@ export type ScenarioCategory =
 
 export type ScenarioDifficulty = 'easy' | 'medium' | 'hard';
 
+/** 고객사 시스템 노드 — workspace+guest 화면 아래 가로 줄지어 표시되는 외부 연계 시스템 카드.
+ *  단계별로 activeSystems 와 systemStatuses 로 활성화/상태가 갱신된다. */
+export type SystemAccent = 'indigo' | 'emerald' | 'amber' | 'sky' | 'rose' | 'slate';
+export interface SystemNode {
+  id: string;
+  label: string;
+  labelEn?: string;
+  /** 단계별로 systemStatuses 가 override 하지 않으면 기본 상태로 표시된다. */
+  defaultStatus?: string;
+  activeStatus?: string;
+  /** 카드 아이콘 색 톤 */
+  accent?: SystemAccent;
+  /** Lucide 아이콘 이름 (예: 'ScanLine', 'Database') — runtime 에서 lucide-react map 으로 조회 */
+  icon?: string;
+}
+
 export interface Step {
   id: string;
   order: number;
@@ -21,6 +37,10 @@ export interface Step {
   /** 신규: 마이크로 UI 액션 시퀀스. 있으면 ⏭/⏮ 가 액션 단위. */
   actions?: UIAction[];
   uiState?: Record<string, unknown>;
+  /** 이 단계에서 펄스로 표시되는 활성 시스템 id 목록. */
+  activeSystems?: string[];
+  /** 이 단계에서만 보이는 시스템 상태 텍스트 override. {시스템id: 상태} */
+  systemStatuses?: Record<string, string>;
 }
 
 export interface ImpactMetric {
@@ -62,6 +82,8 @@ export interface Scenario extends ScenarioMeta {
   beforeSteps?: Step[];
   metrics?: ImpactMetric[];
   goals?: string[];
+  /** workspace+guest 화면 아래 가로로 표시되는 고객사 시스템 카드들. 단계별로 step.activeSystems 로 활성화. */
+  systems?: SystemNode[];
 }
 
 export type ScenarioSummary = ScenarioMeta;
